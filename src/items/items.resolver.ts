@@ -37,7 +37,7 @@ export class ItemsResolver {
   @Mutation(() => Item)
   async removeItem(
     @Args('id', { type: () => String }) id: string,
-  ): Promise<void> {
+  ): Promise<Item> {
     return this.itemsService.remove(id);
   }
 }
