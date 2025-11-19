@@ -1,10 +1,11 @@
-import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { ObjectType, Field, ID, Float, Directive } from '@nestjs/graphql';
+import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity({name: 'items'})
+@Entity({ name: 'items' })
 @ObjectType()
 export class Item {
-
   @PrimaryGeneratedColumn('uuid')
   @Field(() => ID)
   id: string;
@@ -13,12 +14,18 @@ export class Item {
   @Field(() => String)
   name: string;
 
-  @Column()
-  @Field(() => Float)
-  quantity: number;
+  // @Column()
+  // @Field(() => Float)
+  // quantity: number;
 
   @Column({ nullable: true })
   @Field(() => String, { nullable: true })
-  quantityUnits?: string;
-  
+  quantityUnits?: string; // g, ml, kg, tsp, cup, unit, etc.
+
+  // Users
+  @ManyToOne(() => User, (user) => user.items, { nullable: false, lazy: true })
+  @Index('userId-index')
+  @Field(() => User)
+  @Directive(`@auth(requires: [${ValidRoles.admin}, ${ValidRoles.user}])`)
+  user: User;
 }

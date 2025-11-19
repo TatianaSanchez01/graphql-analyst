@@ -11,26 +11,25 @@ import { AuthResolver } from './auth.resolver';
 import { UsersModule } from '../users/users.module';
 
 @Module({
-  providers: [ AuthResolver, AuthService, JwtStrategy],
-  exports: [ JwtStrategy, PassportModule, JwtModule ],
+  providers: [AuthResolver, AuthService, JwtStrategy],
+  exports: [JwtStrategy, PassportModule, JwtModule],
   imports: [
-
     ConfigModule,
 
     PassportModule.register({ defaultStrategy: 'jwt' }),
 
     JwtModule.registerAsync({
-      imports: [ ConfigModule ],
-      inject: [ ConfigService ],
-      useFactory: ( configService: ConfigService ) => ({ 
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
         secret: configService.get('JWT_SECRET'),
         signOptions: {
-          expiresIn: '4h'
-        }
-      })
+          expiresIn: '4h',
+        },
+      }),
     }),
-    
+
     UsersModule,
-  ]
+  ],
 })
 export class AuthModule {}
