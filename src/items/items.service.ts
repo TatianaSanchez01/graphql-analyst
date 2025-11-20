@@ -4,6 +4,7 @@ import { Item } from './entities/item.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { PaginationArgs, SearchArgs } from 'src/common/dto/args';
 
 @Injectable()
 export class ItemsService {
@@ -20,18 +21,33 @@ export class ItemsService {
     return await this.itemsRepository.save(newItem);
   }
 
-  async findAll(user: User): Promise<Item[]> {
-    return await this.itemsRepository.find({
-      where: {
-        user: {
-          id: user.id,
-        },
-      },
-    });
+  async findAll(
+    user: User,
+    paginationArgs: PaginationArgs,
+    searchArgs: SearchArgs,
+  ): Promise<Item[]> {
+    const { limit, offset } = paginationArgs;
+    const { search } = searchArgs;
+
+    const queryBuilder = this.itemsRepository.createQueryBuilder('item')
+      .take(limit)
+      .skip(offset)
+      .where('item.userId = :userId', { userId: user.id });
+
+    if (search) {
+      queryBuilder.andWhere('LOWER(item.name) ILIKE :search', {
+        search: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    return await queryBuilder.getMany();
   }
 
   async findOne(id: string, user: User): Promise<Item> {
-    const item = await this.itemsRepository.findOneBy({ id, user: { id: user.id } });
+    const item = await this.itemsRepository.findOneBy({
+      id,
+      user: { id: user.id },
+    });
 
     if (!item) {
       throw new NotFoundException(`Item with ID ${id} not found`);
@@ -40,9 +56,13 @@ export class ItemsService {
     return item;
   }
 
-  async update(id: string, updateItemInput: UpdateItemInput, user: User): Promise<Item> {
+  async update(
+    id: string,
+    updateItemInput: UpdateItemInput,
+    user: User,
+  ): Promise<Item> {
     await this.findOne(id, user);
-    
+
     const item = await this.itemsRepository.preload({
       ...updateItemInput,
     });
