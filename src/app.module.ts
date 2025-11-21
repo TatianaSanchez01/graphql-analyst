@@ -14,6 +14,8 @@ import { JwtService } from '@nestjs/jwt';
 import { authDirectiveTransformer } from './auth/directives/auth-directive.directive';
 import { SeedModule } from './seed/seed.module';
 import { CommonModule } from './common/common.module';
+import { ListsModule } from './lists/lists.module';
+import { ListItemModule } from './list-item/list-item.module';
 
 @Module({
   imports: [
@@ -61,6 +63,8 @@ import { CommonModule } from './common/common.module';
     AuthModule,
     SeedModule,
     CommonModule,
+    ListsModule,
+    ListItemModule,
   ],
   controllers: [],
   providers: [],

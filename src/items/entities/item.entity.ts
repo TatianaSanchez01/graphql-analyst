@@ -1,7 +1,8 @@
 import { ObjectType, Field, ID, Float, Directive } from '@nestjs/graphql';
 import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
+import { ListItem } from 'src/list-item/entities/list-item.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity({ name: 'items' })
 @ObjectType()
@@ -28,4 +29,9 @@ export class Item {
   @Field(() => User)
   @Directive(`@auth(requires: [${ValidRoles.admin}, ${ValidRoles.user}])`)
   user: User;
+
+  
+  @OneToMany(() => ListItem, (listItem) => listItem.item, { lazy: true })
+  @Field( () => [ListItem] )
+  listItem: ListItem[]
 }
